@@ -51,14 +51,19 @@ function memo(time) {
         const cache = new Map();
         descriptor.value = function (...args) {
             return __awaiter(this, void 0, void 0, function* () {
+                let start = Date.now();
                 if (cache.has(args[0])) {
                     console.log("From cache");
-                    console.log(cache.get(args[0]));
+                    console.log(cache.get(args[0]).res);
+                    const end = Date.now();
+                    if (end - cache.get(args[0]).startTime >= time * 60 * 1000) {
+                        cache.delete(args[0]);
+                        start = Date.now();
+                    }
                 }
                 else {
                     const result = yield getUserById.call(this, args);
-                    setTimeout(() => cache.clear(), time * 1000 * 60);
-                    cache.set(args[0], result);
+                    cache.set(args[0], { res: result, startTime: start });
                     console.log(result);
                 }
             });
